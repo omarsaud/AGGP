@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data (too large for GitHub — see data/README.md for download instructions)
+data/*/scaled_speed.npy
+data/*/scaled_acceleration.npy
+data/*/adj_mx.pkl
+
+# Trained models (large binary files)
+models/
+*.pt
+*.pth
+*.ckpt
+
+# Results
+*.npy
+*.csv
+
+# Logs
+*.log
+ablation_log.txt
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
