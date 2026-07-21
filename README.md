@@ -30,22 +30,15 @@ an additional acceleration graph.
 
 ## Architecture
 
-```
-Input [speed, accel]
-       │
-       ├──────────────────────────┐
-       │  Backbone (speed)        │  Gate signal (|accel|)
-       ▼                          ▼
-  start_conv                  AccelerationGate
-       │                      │  MLP: 1→32→64 → Sigmoid
-       ▼                      │
-  ST-Block × 4                │
-  ├── TCN (gated dilated)     │
-  ├── GCN (fixed + adaptive)  │
-  └── AGGP gate ──────────────┘  x_out = x_gcn × (1 + α·g)
-       │
-  Output head → speed prediction
-```
+![AGGP architecture](figures/architecture.png)
+
+**Left:** the pipeline — dual-channel input, four ST-blocks (each TCN → GCN → **AGGP gate**),
+skip connections and the output head. **Right:** the acceleration gate — `|a|` is
+instance-normalised per window, an MLP (1→32→64) maps it to a per-channel gate `g ∈ (0,1)`,
+which modulates the GCN output as `h_GCN · (1 + α·g)`. Each ST-block carries its own
+independent gate and learns its own `α`.
+
+A vector version is available at [`figures/architecture.pdf`](figures/architecture.pdf).
 
 ---
 
@@ -161,6 +154,9 @@ AGGP/
 ├── train.py               ← Single-experiment entry point
 ├── ablation.py            ← Full ablation study
 ├── visualize_configs.py   ← Diagram of the ablation configurations
+├── figures/
+│   ├── architecture.png   ← Architecture diagram
+│   └── architecture.pdf   ← Vector version
 ├── model/
 │   ├── __init__.py
 │   └── aggp.py            ← AGGP model and acceleration gate
