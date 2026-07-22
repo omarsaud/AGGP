@@ -139,6 +139,31 @@ Defaults in `train.py`, identical across all configurations for a fair compariso
 
 ---
 
+## Evaluation
+
+`evaluate.py` scores a finished run under the exact protocol used in the paper, reading the
+saved predictions rather than re-running the model:
+
+```bash
+python evaluate.py --run_dir models/gwnet_aggp_metr-la_Acc_Q12 --dataset metr-la
+python evaluate.py --run_dir <dir> --dataset pems-bay --per_horizon
+```
+
+### Reporting protocol
+
+| Aspect | Convention |
+|---|---|
+| Test window | First **6784** samples (METR-LA) / **10368** (PEMS-BAY) of the test split, so every configuration is scored on an identical window |
+| Denormalisation | One dataset-level mean/std, applied to predictions and targets alike → speeds in mph |
+| MAE | Computed per horizon step, then averaged over the 12 steps |
+| RMSE | Computed over all entries at once |
+| MAPE | Excludes ground-truth speeds below **5 mph** |
+
+The MAPE cut-off matters: percentage error divides by the observed speed, so
+near-stationary readings yield arbitrarily large ratios that dominate the average without
+reflecting forecast quality. The threshold is applied identically to every configuration
+and baseline.
+
 ## Results
 
 Full results — five configurations on METR-LA and PEMS-BAY, per-horizon breakdowns,
@@ -152,6 +177,7 @@ See the Citation section below.
 ```
 AGGP/
 ├── train.py               ← Single-experiment entry point
+├── evaluate.py            ← Scores saved predictions under the paper's protocol
 ├── ablation.py            ← Full ablation study
 ├── visualize_configs.py   ← Diagram of the ablation configurations
 ├── figures/
