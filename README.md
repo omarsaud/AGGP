@@ -155,8 +155,7 @@ python evaluate.py --run_dir <dir> --dataset pems-bay --per_horizon
 |---|---|
 | Test window | First **6784** samples (METR-LA) / **10368** (PEMS-BAY) of the test split, so every configuration is scored on an identical window |
 | Denormalisation | One dataset-level mean/std, applied to predictions and targets alike → speeds in mph |
-| MAE | Computed per horizon step, then averaged over the 12 steps |
-| RMSE | Computed over all entries at once |
+| Averaging | Every metric is computed per horizon step, then averaged over the 12 steps |
 | MAPE | Excludes ground-truth speeds below **5 mph** |
 
 The MAPE cut-off matters: percentage error divides by the observed speed, so

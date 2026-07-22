@@ -16,8 +16,8 @@ Protocol
                   scored on an identical window.
 * Denormalization: a single dataset-level mean/std, applied to predictions and
                   targets alike, giving speeds in mph.
-* MAE           : computed per horizon step, then averaged over the 12 steps.
-* RMSE          : computed over all entries at once.
+* Averaging     : every metric is computed per horizon step and then averaged
+                  over the 12 steps, so all three share one convention.
 * MAPE          : excludes ground-truth speeds below 5 mph (see utils/metrics).
 """
 
@@ -56,13 +56,12 @@ def load_run(run_dir, dataset):
 
 def evaluate(pred, targ, mape_min_speed=MAPE_MIN_SPEED):
     """Averaged metrics under the paper's conventions."""
-    q_steps = pred.shape[2]
-    mae = float(np.mean([np.abs(pred[:, :, q] - targ[:, :, q]).mean()
-                         for q in range(q_steps)]))
-    rmse = float(np.sqrt(((pred - targ) ** 2).mean()))
-    m = targ >= mape_min_speed
-    mape = float((np.abs(targ[m] - pred[m]) / targ[m]).mean() * 100)
-    return dict(mae=mae, rmse=rmse, mape=mape)
+    ph = evaluate_per_horizon(pred, targ, mape_min_speed)
+    return dict(
+        mae=float(np.mean([h["mae"] for h in ph])),
+        rmse=float(np.mean([h["rmse"] for h in ph])),
+        mape=float(np.mean([h["mape"] for h in ph])),
+    )
 
 
 def evaluate_per_horizon(pred, targ, mape_min_speed=MAPE_MIN_SPEED):
