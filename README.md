@@ -145,8 +145,10 @@ Defaults in `train.py`, identical across all configurations for a fair compariso
 saved predictions rather than re-running the model:
 
 ```bash
-python evaluate.py --run_dir models/gwnet_aggp_metr-la_Acc_Q12 --dataset metr-la
-python evaluate.py --run_dir <dir> --dataset pems-bay --per_horizon
+python evaluate.py --run_dir models/gwnet_aggp_metr-la_Acc_Q12 \
+                   --dataset metr-la --raw data/metr-la/metr-la.h5
+python evaluate.py --run_dir <dir> --dataset pems-bay \
+                   --raw data/pems-bay/pems-bay.h5 --per_horizon
 ```
 
 ### Reporting protocol
@@ -154,14 +156,17 @@ python evaluate.py --run_dir <dir> --dataset pems-bay --per_horizon
 | Aspect | Convention |
 |---|---|
 | Test window | First **6784** samples (METR-LA) / **10368** (PEMS-BAY) of the test split, so every configuration is scored on an identical window |
-| Denormalisation | One dataset-level mean/std, applied to predictions and targets alike → speeds in mph |
+| Denormalisation | Inputs are standardised **per sensor**, so predictions are mapped back to mph with each sensor's own mean/std; ground truth is read from the benchmark file |
+| Missing data | A ground-truth speed of exactly 0 marks a missing detector reading and is excluded from all three metrics |
 | Averaging | Every metric is computed per horizon step, then averaged over the 12 steps |
-| MAPE | Excludes ground-truth speeds below **5 mph** |
+| MAPE | Additionally excludes ground-truth speeds below **5 mph** |
 
-The MAPE cut-off matters: percentage error divides by the observed speed, so
-near-stationary readings yield arbitrarily large ratios that dominate the average without
-reflecting forecast quality. The threshold is applied identically to every configuration
-and baseline.
+Two details matter for reproducing the paper. First, the benchmarks are normalised **per
+sensor**, so denormalising with a single global mean/std would distort every sensor's scale
+(and can even produce negative speeds for slow sensors); `evaluate.py` uses each sensor's
+own statistics and reads ground truth straight from the raw file. Second, the MAPE cut-off:
+percentage error divides by the observed speed, so near-stationary readings yield
+arbitrarily large ratios. Both are applied identically to every configuration and baseline.
 
 ## Results
 
