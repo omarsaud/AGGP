@@ -151,6 +151,22 @@ python evaluate.py --run_dir <dir> --dataset pems-bay \
                    --raw data/pems-bay/pems-bay.h5 --per_horizon
 ```
 
+`diebold_mariano.py` runs the significance test between any two finished runs, reusing the
+same loader, denormalisation, window and masks as `evaluate.py`, so the losses it compares
+are exactly those behind the accuracy tables:
+
+```bash
+python diebold_mariano.py \
+    --run_a models/gwnet_aggp_metr-la_Acc_Q12 \
+    --run_b models/gwnet_metr-la_Acc_Q12 \
+    --dataset metr-la --raw data/metr-la/metr-la.h5
+```
+
+It reports the Harvey–Leybourne–Newbold-corrected statistic and two-sided *p*-value at each
+horizon under both absolute-error and squared-error loss; a negative statistic favours
+`--run_a`. Together the two scripts reproduce every reported table — accuracy, backbone
+comparison, per-horizon breakdown, and significance — from saved predictions alone.
+
 ### Reporting protocol
 
 | Aspect | Convention |
@@ -182,6 +198,7 @@ See the Citation section below.
 AGGP/
 ├── train.py               ← Single-experiment entry point
 ├── evaluate.py            ← Scores saved predictions under the paper's protocol
+├── diebold_mariano.py     ← Significance test between two saved runs
 ├── ablation.py            ← Full ablation study
 ├── visualize_configs.py   ← Diagram of the ablation configurations
 ├── figures/
